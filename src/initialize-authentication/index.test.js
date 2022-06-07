@@ -20,7 +20,7 @@ describe('useInitializeAuthentication', () => {
         onSignInFailure: jest.fn(),
         onSignOut: jest.fn()
     };
-    const refreshAuthStateMock = jest.fn();
+    const initializeAuthStateMock = jest.fn();
 
     const defaultDeps = [
         injectable(useAuthenticationState, useAuthenticationStateMock),
@@ -30,7 +30,7 @@ describe('useInitializeAuthentication', () => {
     beforeEach(() => {
         useAuthenticationStateMock.mockReturnValue([
             { isAuthenticated: true, isInitialized: true },
-            { refreshAuthState: refreshAuthStateMock }
+            { initializeAuthState: initializeAuthStateMock }
         ]);
     });
 
@@ -134,10 +134,10 @@ describe('useInitializeAuthentication', () => {
         });
     });
 
-    it('should refresh authentication state', () => {
+    it('should initialize authentication state', () => {
         useAuthenticationStateMock.mockReturnValue([
             { isAuthenticated: 'isAuthenticatedMock', isInitialized: false },
-            { refreshAuthState: refreshAuthStateMock }
+            { initializeAuthState: initializeAuthStateMock }
         ]);
 
         runHookWithDi(
@@ -145,13 +145,13 @@ describe('useInitializeAuthentication', () => {
             { deps: defaultDeps }
         );
 
-        expect(refreshAuthStateMock).toHaveBeenCalledTimes(1);
+        expect(initializeAuthStateMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should not refresh authentication state when isInitialized is true', () => {
+    it('should not initialize authentication state when isInitialized is true', () => {
         useAuthenticationStateMock.mockReturnValue([
             { isAuthenticated: 'isAuthenticatedMock', isInitialized: true },
-            { refreshAuthState: refreshAuthStateMock }
+            { initializeAuthState: initializeAuthStateMock }
         ]);
 
         runHookWithDi(
@@ -159,13 +159,13 @@ describe('useInitializeAuthentication', () => {
             { deps: defaultDeps }
         );
 
-        expect(refreshAuthStateMock).not.toHaveBeenCalled();
+        expect(initializeAuthStateMock).not.toHaveBeenCalled();
     });
 
-    it('should not refresh authentication state when canInitialize is false', () => {
+    it('should not initialize authentication state when canInitialize is false', () => {
         useAuthenticationStateMock.mockReturnValue([
             { isAuthenticated: 'isAuthenticatedMock', isInitialized: false },
-            { refreshAuthState: refreshAuthStateMock }
+            { initializeAuthState: initializeAuthStateMock }
         ]);
 
         runHookWithDi(
@@ -173,6 +173,6 @@ describe('useInitializeAuthentication', () => {
             { deps: defaultDeps }
         );
 
-        expect(refreshAuthStateMock).not.toHaveBeenCalled();
+        expect(initializeAuthStateMock).not.toHaveBeenCalled();
     });
 });

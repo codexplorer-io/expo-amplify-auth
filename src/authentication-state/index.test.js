@@ -53,6 +53,7 @@ describe('Authentication State', () => {
             isAuthenticated: false
         });
         expect(actions).toEqual({
+            initializeAuthState: expect.any(Function),
             getLinkedStore: expect.any(Function),
             refreshAuthState: expect.any(Function),
             getIsAuthenticated: expect.any(Function),
@@ -65,7 +66,24 @@ describe('Authentication State', () => {
             confirmSignUpWithUsername: expect.any(Function),
             resendSignUpWithUsername: expect.any(Function),
             forgotPasswordWithUsername: expect.any(Function),
-            forgotPasswordSubmitWithUsername: expect.any(Function)
+            forgotPasswordSubmitWithUsername: expect.any(Function),
+            deleteAccount: expect.any(Function)
+        });
+    });
+
+    describe('initializeAuthState', () => {
+        it('should call setState with user and initialization data', async () => {
+            Auth.currentAuthenticatedUser.mockResolvedValue('user');
+            const setState = jest.fn();
+            const dispatch = jest.fn(fn => fn({ setState }));
+            const { actions: { initializeAuthState } } = Store;
+            const thunk = initializeAuthState({ awsCognitoRegion: 'mockRegion' });
+
+            await thunk({ setState, dispatch });
+
+            expect(setState).toHaveBeenCalledTimes(2);
+            expect(setState).toHaveBeenCalledWith({ user: 'user', isAuthenticated: true });
+            expect(setState).toHaveBeenCalledWith({ isInitialized: true, awsCognitoRegion: 'mockRegion' });
         });
     });
 
@@ -78,9 +96,8 @@ describe('Authentication State', () => {
 
             await thunk({ setState });
 
-            expect(setState).toHaveBeenCalledTimes(2);
+            expect(setState).toHaveBeenCalledTimes(1);
             expect(setState).toHaveBeenCalledWith({ user: 'user', isAuthenticated: true });
-            expect(setState).toHaveBeenCalledWith({ isInitialized: true });
         });
 
         it('should call setState when user not authenticated', async () => {
@@ -91,9 +108,8 @@ describe('Authentication State', () => {
 
             await thunk({ setState });
 
-            expect(setState).toHaveBeenCalledTimes(2);
+            expect(setState).toHaveBeenCalledTimes(1);
             expect(setState).toHaveBeenCalledWith({ user: null, isAuthenticated: false });
-            expect(setState).toHaveBeenCalledWith({ isInitialized: true });
         });
 
         it('should call setState when authentication failed', async () => {
@@ -104,9 +120,8 @@ describe('Authentication State', () => {
 
             await thunk({ setState });
 
-            expect(setState).toHaveBeenCalledTimes(2);
+            expect(setState).toHaveBeenCalledTimes(1);
             expect(setState).toHaveBeenCalledWith({ user: null, isAuthenticated: false });
-            expect(setState).toHaveBeenCalledWith({ isInitialized: true });
         });
     });
 
@@ -356,6 +371,7 @@ describe('Authentication State', () => {
             expect(hookRunner.hookResult).toEqual([
                 'mockSelectorResult',
                 {
+                    initializeAuthState: expect.any(Function),
                     getLinkedStore: expect.any(Function),
                     refreshAuthState: expect.any(Function),
                     getIsAuthenticated: expect.any(Function),
@@ -368,7 +384,8 @@ describe('Authentication State', () => {
                     confirmSignUpWithUsername: expect.any(Function),
                     resendSignUpWithUsername: expect.any(Function),
                     forgotPasswordWithUsername: expect.any(Function),
-                    forgotPasswordSubmitWithUsername: expect.any(Function)
+                    forgotPasswordSubmitWithUsername: expect.any(Function),
+                    deleteAccount: expect.any(Function)
                 }
             ]);
             expect(selector).toHaveBeenCalledTimes(1);
@@ -385,6 +402,7 @@ describe('Authentication State', () => {
             expect(hookRunner.hookResult).toEqual([
                 undefined,
                 {
+                    initializeAuthState: expect.any(Function),
                     getLinkedStore: expect.any(Function),
                     refreshAuthState: expect.any(Function),
                     getIsAuthenticated: expect.any(Function),
@@ -397,7 +415,8 @@ describe('Authentication State', () => {
                     confirmSignUpWithUsername: expect.any(Function),
                     resendSignUpWithUsername: expect.any(Function),
                     forgotPasswordWithUsername: expect.any(Function),
-                    forgotPasswordSubmitWithUsername: expect.any(Function)
+                    forgotPasswordSubmitWithUsername: expect.any(Function),
+                    deleteAccount: expect.any(Function)
                 }
             ]);
         });

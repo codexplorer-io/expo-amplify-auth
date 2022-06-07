@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "peerDependencies": {
-    "lodash": "*"
+    "lodash": "*",
+    "@aws-sdk/client-cognito-identity-provider": "*",
+    "react-sweet-state": "*",
+    "react-magnetic-di": "*",
+    "react": "*",
+    "@codexporer.io/react-test-utils": "*",
+    "@aws-amplify/auth": "*",
+    "@codexporer.io/expo-link-stores": "*",
+    "expo-linking": "*",
+    "react-native": "*",
+    "expo-web-browser": "*",
+    "@aws-amplify/core": "*"
   }
 }

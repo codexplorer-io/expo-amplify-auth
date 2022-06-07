@@ -4,12 +4,15 @@ import { di } from 'react-magnetic-di';
 import { useAuthenticationState } from '../authentication-state';
 import { useAuthenticationEvents } from '../authentication-events';
 
-export const useInitializeAuthentication = ({ canInitialize }) => {
+export const useInitializeAuthentication = ({
+    canInitialize,
+    awsCognitoRegion
+}) => {
     di(useAuthenticationEvents, useAuthenticationState);
 
     const [
         { isInitialized, isAuthenticated },
-        { refreshAuthState }
+        { initializeAuthState }
     ] = useAuthenticationState();
     const {
         onStartSignIn,
@@ -52,11 +55,12 @@ export const useInitializeAuthentication = ({ canInitialize }) => {
 
     // Initialize authentication
     useEffect(() => {
-        canInitialize && !isInitialized && refreshAuthState();
+        canInitialize && !isInitialized && initializeAuthState({ awsCognitoRegion });
     }, [
         canInitialize,
         isInitialized,
-        refreshAuthState
+        initializeAuthState,
+        awsCognitoRegion
     ]);
 
     return { isInitialized, isAuthenticated };
