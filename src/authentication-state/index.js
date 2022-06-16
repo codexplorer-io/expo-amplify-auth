@@ -43,7 +43,7 @@ export const Store = createStore({
     actions: {
         ...actions,
         initializeAuthState: ({ awsCognitoRegion }) => async ({ setState, dispatch }) => {
-            dispatch(refreshAuthState());
+            await dispatch(refreshAuthState());
 
             setState({
                 isInitialized: true,
