@@ -70,7 +70,7 @@ export const Store = createStore({
             code,
             password
         }) => () => Auth.forgotPasswordSubmit(username, code, password),
-        deleteAccount: () => async ({ getState }) => {
+        deleteAccount: () => async ({ getState, setState }) => {
             const { user, awsCognitoRegion } = getState();
             const client = new CognitoIdentityProviderClient({
                 region: awsCognitoRegion
@@ -82,6 +82,8 @@ export const Store = createStore({
             if (response?.$metadata?.httpStatusCode !== 200) {
                 throw new Error('Could not delete user account!');
             }
+
+            setState({ isAuthenticated: false });
         }
     },
     name: 'AuthenticationState'
