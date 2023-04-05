@@ -1,6 +1,7 @@
 export {
     useAuthenticationState,
-    useAuthenticationStateActions
+    useAuthenticationStateActions,
+    useIsAuthenticated
 } from './authentication-state';
 export { useAuthenticationEventsSubscriberActions } from './authentication-events';
 export { useInitializeAuthentication } from './initialize-authentication';

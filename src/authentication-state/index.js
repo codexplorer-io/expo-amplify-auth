@@ -5,7 +5,8 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
     createStore,
-    createHook
+    createHook,
+    createStateHook
 } from 'react-sweet-state';
 import {
     initialState,
@@ -93,4 +94,8 @@ export const useAuthenticationState = createHook(Store, { selector: state => sel
 
 export const useAuthenticationStateActions = createHook(Store, {
     selector: null
+});
+
+export const useIsAuthenticated = createStateHook(Store, {
+    selector: ({ isAuthenticated }) => isAuthenticated
 });
