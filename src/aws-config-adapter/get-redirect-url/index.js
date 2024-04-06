@@ -5,6 +5,6 @@ import startsWith from 'lodash/startsWith';
 
 export const getRedirectUrl = config => {
     const allowedUrls = split(config.oauth.redirectSignIn, ',');
-    const currentUrl = Linking.makeUrl();
-    return find(allowedUrls, allowedUrl => startsWith(allowedUrl, currentUrl));
+    const currentUrl = Linking.createURL();
+    return find(allowedUrls, allowedUrl => startsWith(currentUrl, allowedUrl));
 };

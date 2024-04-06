@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import { getRedirectUrl } from './index';
 
 jest.mock('expo-linking', () => ({
-    makeUrl: jest.fn()
+    createURL: jest.fn()
 }));
 
 const configMock = { oauth: { redirectSignIn: 'testurl1,testurl2,testurl3' } };
@@ -13,7 +13,7 @@ describe('Get Redirect URL', () => {
     });
 
     it('should return url when found', () => {
-        Linking.makeUrl.mockReturnValue('testurl2');
+        Linking.createURL.mockReturnValue('testurl2');
 
         const resultUrl = getRedirectUrl(configMock);
 
@@ -21,7 +21,7 @@ describe('Get Redirect URL', () => {
     });
 
     it('should return undefined when url not found', () => {
-        Linking.makeUrl.mockReturnValue('testurl4');
+        Linking.createURL.mockReturnValue('testurl4');
 
         const resultUrl = getRedirectUrl(configMock);
 
