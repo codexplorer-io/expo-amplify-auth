@@ -1,5 +1,15 @@
 import { runHookWithDi } from '@codexporer.io/react-test-utils';
-import { Auth } from '@aws-amplify/auth';
+import {
+    getCurrentUser,
+    signUp,
+    confirmSignUp,
+    resendSignUpCode,
+    resetPassword,
+    confirmResetPassword,
+    signInWithRedirect,
+    signIn,
+    signOut
+} from 'aws-amplify/auth';
 import { selector } from '@codexporer.io/expo-link-stores';
 import {
     useAuthenticationStateActions,
@@ -15,23 +25,16 @@ jest.mock('@codexporer.io/expo-link-stores', () => ({
     selector: jest.fn()
 }));
 
-jest.mock('@aws-amplify/auth', () => ({
-    Auth: {
-        currentAuthenticatedUser: jest.fn(),
-        federatedSignIn: jest.fn(),
-        signIn: jest.fn(),
-        signUp: jest.fn(),
-        signOut: jest.fn(),
-        confirmSignUp: jest.fn(),
-        resendSignUp: jest.fn(),
-        forgotPassword: jest.fn(),
-        forgotPasswordSubmit: jest.fn()
-    },
-    CognitoHostedUIIdentityProvider: {
-        Google: 'Google',
-        Apple: 'Apple'
-    }
-
+jest.mock('aws-amplify/auth', () => ({
+    getCurrentUser: jest.fn(),
+    signUp: jest.fn(),
+    confirmSignUp: jest.fn(),
+    resendSignUpCode: jest.fn(),
+    resetPassword: jest.fn(),
+    confirmResetPassword: jest.fn(),
+    signInWithRedirect: jest.fn(),
+    signIn: jest.fn(),
+    signOut: jest.fn()
 }));
 
 describe('Authentication State', () => {
@@ -73,7 +76,7 @@ describe('Authentication State', () => {
 
     describe('initializeAuthState', () => {
         it('should call setState with user and initialization data', async () => {
-            Auth.currentAuthenticatedUser.mockResolvedValue('user');
+            getCurrentUser.mockResolvedValue('user');
             const setState = jest.fn();
             const dispatch = jest.fn(fn => fn({ setState }));
             const { actions: { initializeAuthState } } = Store;
@@ -89,7 +92,7 @@ describe('Authentication State', () => {
 
     describe('refreshAuthState', () => {
         it('should call setState when user authenticated', async () => {
-            Auth.currentAuthenticatedUser.mockResolvedValue('user');
+            getCurrentUser.mockResolvedValue('user');
             const setState = jest.fn();
             const { actions: { refreshAuthState } } = Store;
             const thunk = refreshAuthState();
@@ -101,7 +104,7 @@ describe('Authentication State', () => {
         });
 
         it('should call setState when user not authenticated', async () => {
-            Auth.currentAuthenticatedUser.mockResolvedValue(null);
+            getCurrentUser.mockResolvedValue(null);
             const setState = jest.fn();
             const { actions: { refreshAuthState } } = Store;
             const thunk = refreshAuthState();
@@ -113,7 +116,7 @@ describe('Authentication State', () => {
         });
 
         it('should call setState when authentication failed', async () => {
-            Auth.currentAuthenticatedUser = jest.fn().mockRejectedValue();
+            getCurrentUser.mockRejectedValue();
             const setState = jest.fn();
             const { actions: { refreshAuthState } } = Store;
             const thunk = refreshAuthState();
@@ -139,19 +142,19 @@ describe('Authentication State', () => {
     });
 
     describe('signInWithHostedUi', () => {
-        it('should call federatedSignIn and return resolved value', async () => {
-            Auth.federatedSignIn = jest.fn().mockResolvedValue('success');
+        it('should call signInWithRedirect and return resolved value', async () => {
+            signInWithRedirect.mockResolvedValue('success');
             const { actions: { signInWithHostedUi } } = Store;
             const thunk = signInWithHostedUi();
 
             const result = await thunk();
 
-            expect(Auth.federatedSignIn).toHaveBeenCalledTimes(1);
+            expect(signInWithRedirect).toHaveBeenCalledTimes(1);
             expect(result).toEqual('success');
         });
 
-        it('should call federatedSignIn and return rejected value', async () => {
-            Auth.federatedSignIn = jest.fn().mockRejectedValue('error');
+        it('should call signInWithRedirect and return rejected value', async () => {
+            signInWithRedirect.mockRejectedValue('error');
             const { actions: { signInWithHostedUi } } = Store;
 
             const thunk = signInWithHostedUi();
@@ -161,20 +164,20 @@ describe('Authentication State', () => {
     });
 
     describe('signInWithGoogle', () => {
-        it('should call federatedSignIn and return resolved value', async () => {
-            Auth.federatedSignIn = jest.fn().mockResolvedValue('success');
+        it('should call signInWithRedirect and return resolved value', async () => {
+            signInWithRedirect.mockResolvedValue('success');
             const { actions: { signInWithGoogle } } = Store;
             const thunk = signInWithGoogle();
 
             const result = await thunk();
 
-            expect(Auth.federatedSignIn).toHaveBeenCalledTimes(1);
-            expect(Auth.federatedSignIn).toHaveBeenCalledWith({ provider: 'Google' });
+            expect(signInWithRedirect).toHaveBeenCalledTimes(1);
+            expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Google' });
             expect(result).toEqual('success');
         });
 
-        it('should call federatedSignIn and return rejected value', async () => {
-            Auth.federatedSignIn = jest.fn().mockRejectedValue('error');
+        it('should call signInWithRedirect and return rejected value', async () => {
+            signInWithRedirect.mockRejectedValue('error');
             const { actions: { signInWithGoogle } } = Store;
 
             const thunk = signInWithGoogle();
@@ -184,20 +187,20 @@ describe('Authentication State', () => {
     });
 
     describe('signInWithApple', () => {
-        it('should call federatedSignIn and return resolved value', async () => {
-            Auth.federatedSignIn = jest.fn().mockResolvedValue('success');
+        it('should call signInWithRedirect and return resolved value', async () => {
+            signInWithRedirect.mockResolvedValue('success');
             const { actions: { signInWithApple } } = Store;
             const thunk = signInWithApple();
 
             const result = await thunk();
 
-            expect(Auth.federatedSignIn).toHaveBeenCalledTimes(1);
-            expect(Auth.federatedSignIn).toHaveBeenCalledWith({ provider: 'Apple' });
+            expect(signInWithRedirect).toHaveBeenCalledTimes(1);
+            expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Apple' });
             expect(result).toEqual('success');
         });
 
-        it('should call federatedSignIn and return rejected value', async () => {
-            Auth.federatedSignIn = jest.fn().mockRejectedValue('error');
+        it('should call signInWithRedirect and return rejected value', async () => {
+            signInWithRedirect.mockRejectedValue('error');
             const { actions: { signInWithApple } } = Store;
 
             const thunk = signInWithApple();
@@ -208,21 +211,21 @@ describe('Authentication State', () => {
 
     describe('signOut', () => {
         it('should call signOut and return resolved value', async () => {
-            Auth.signOut = jest.fn().mockResolvedValue('success');
-            const { actions: { signOut } } = Store;
-            const thunk = signOut();
+            signOut.mockResolvedValue('success');
+            const { actions: { signOut: signOutAction } } = Store;
+            const thunk = signOutAction();
 
             const result = await thunk();
 
-            expect(Auth.signOut).toHaveBeenCalledTimes(1);
+            expect(signOut).toHaveBeenCalledTimes(1);
             expect(result).toEqual('success');
         });
 
         it('should call signOut and return rejected value', async () => {
-            Auth.signOut = jest.fn().mockRejectedValue('error');
-            const { actions: { signOut } } = Store;
+            signOut.mockRejectedValue('error');
+            const { actions: { signOut: signOutAction } } = Store;
 
-            const thunk = signOut();
+            const thunk = signOutAction();
 
             expect(thunk).rejects.toEqual('error');
         });
@@ -230,19 +233,19 @@ describe('Authentication State', () => {
 
     describe('signInWithUsername', () => {
         it('should call signIn and return resolved value', async () => {
-            Auth.signIn = jest.fn().mockResolvedValue('success');
+            signIn.mockResolvedValue('success');
             const { actions: { signInWithUsername } } = Store;
             const thunk = signInWithUsername({ username: 'testuser', password: 'testpass' });
 
             const result = await thunk();
 
-            expect(Auth.signIn).toHaveBeenCalledTimes(1);
-            expect(Auth.signIn).toHaveBeenCalledWith('testuser', 'testpass');
+            expect(signIn).toHaveBeenCalledTimes(1);
+            expect(signIn).toHaveBeenCalledWith({ username: 'testuser', password: 'testpass' });
             expect(result).toEqual('success');
         });
 
         it('should call signIn and return rejected value', async () => {
-            Auth.signIn = jest.fn().mockRejectedValue('error');
+            signIn.mockRejectedValue('error');
             const { actions: { signInWithUsername } } = Store;
             const thunk = signInWithUsername({ username: 'testuser', password: 'testpass' });
 
@@ -252,19 +255,19 @@ describe('Authentication State', () => {
 
     describe('signUpWithUsername', () => {
         it('should call signUp and return resolved value', async () => {
-            Auth.signUp = jest.fn().mockResolvedValue('success');
+            signUp.mockResolvedValue('success');
             const { actions: { signUpWithUsername } } = Store;
             const thunk = signUpWithUsername({ username: 'testuser', password: 'testpass' });
 
             const result = await thunk();
 
-            expect(Auth.signUp).toHaveBeenCalledTimes(1);
-            expect(Auth.signUp).toHaveBeenCalledWith({ username: 'testuser', password: 'testpass' });
+            expect(signUp).toHaveBeenCalledTimes(1);
+            expect(signUp).toHaveBeenCalledWith({ username: 'testuser', password: 'testpass' });
             expect(result).toEqual('success');
         });
 
         it('should call signUp and return rejected value', async () => {
-            Auth.signUp = jest.fn().mockRejectedValue('error');
+            signUp.mockRejectedValue('error');
             const { actions: { signUpWithUsername } } = Store;
             const thunk = signUpWithUsername({ username: 'testuser', password: 'testpass' });
 
@@ -274,19 +277,22 @@ describe('Authentication State', () => {
 
     describe('confirmSignUpWithUsername', () => {
         it('should call confirmSignUp and return resolved value', async () => {
-            Auth.confirmSignUp = jest.fn().mockResolvedValue('success');
+            confirmSignUp.mockResolvedValue('success');
             const { actions: { confirmSignUpWithUsername } } = Store;
             const thunk = confirmSignUpWithUsername({ username: 'testuser', code: 'testcode' });
 
             const result = await thunk();
 
-            expect(Auth.confirmSignUp).toHaveBeenCalledTimes(1);
-            expect(Auth.confirmSignUp).toHaveBeenCalledWith('testuser', 'testcode');
+            expect(confirmSignUp).toHaveBeenCalledTimes(1);
+            expect(confirmSignUp).toHaveBeenCalledWith({
+                username: 'testuser',
+                confirmationCode: 'testcode'
+            });
             expect(result).toEqual('success');
         });
 
         it('should call confirmSignUp and return rejected value', async () => {
-            Auth.confirmSignUp = jest.fn().mockRejectedValue('error');
+            confirmSignUp.mockRejectedValue('error');
             const { actions: { confirmSignUpWithUsername } } = Store;
             const thunk = confirmSignUpWithUsername({ username: 'testuser', code: 'testcode' });
 
@@ -295,20 +301,20 @@ describe('Authentication State', () => {
     });
 
     describe('resendSignUpWithUsername', () => {
-        it('should call resendSignUp and return resolved value', async () => {
-            Auth.resendSignUp = jest.fn().mockResolvedValue('success');
+        it('should call resendSignUpCode and return resolved value', async () => {
+            resendSignUpCode.mockResolvedValue('success');
             const { actions: { resendSignUpWithUsername } } = Store;
             const thunk = resendSignUpWithUsername({ username: 'testuser' });
 
             const result = await thunk();
 
-            expect(Auth.resendSignUp).toHaveBeenCalledTimes(1);
-            expect(Auth.resendSignUp).toHaveBeenCalledWith('testuser');
+            expect(resendSignUpCode).toHaveBeenCalledTimes(1);
+            expect(resendSignUpCode).toHaveBeenCalledWith({ username: 'testuser' });
             expect(result).toEqual('success');
         });
 
-        it('should call resendSignUp and return rejected value', async () => {
-            Auth.resendSignUp = jest.fn().mockRejectedValue('error');
+        it('should call resendSignUpCode and return rejected value', async () => {
+            resendSignUpCode.mockRejectedValue('error');
             const { actions: { resendSignUpWithUsername } } = Store;
             const thunk = resendSignUpWithUsername({ username: 'testuser' });
 
@@ -317,20 +323,20 @@ describe('Authentication State', () => {
     });
 
     describe('forgotPasswordWithUsername', () => {
-        it('should call resendSignUp and return resolved value', async () => {
-            Auth.forgotPassword = jest.fn().mockResolvedValue('success');
+        it('should call resetPassword and return resolved value', async () => {
+            resetPassword.mockResolvedValue('success');
             const { actions: { forgotPasswordWithUsername } } = Store;
             const thunk = forgotPasswordWithUsername({ username: 'testuser' });
 
             const result = await thunk();
 
-            expect(Auth.forgotPassword).toHaveBeenCalledTimes(1);
-            expect(Auth.forgotPassword).toHaveBeenCalledWith('testuser');
+            expect(resetPassword).toHaveBeenCalledTimes(1);
+            expect(resetPassword).toHaveBeenCalledWith({ username: 'testuser' });
             expect(result).toEqual('success');
         });
 
-        it('should call resendSignUp and return rejected value', async () => {
-            Auth.forgotPassword = jest.fn().mockRejectedValue('error');
+        it('should call resetPassword and return rejected value', async () => {
+            resetPassword.mockRejectedValue('error');
             const { actions: { forgotPasswordWithUsername } } = Store;
             const thunk = forgotPasswordWithUsername({ username: 'testuser' });
 
@@ -339,22 +345,34 @@ describe('Authentication State', () => {
     });
 
     describe('forgotPasswordSubmitWithUsername', () => {
-        it('should call resendSignUp and return resolved value', async () => {
-            Auth.forgotPasswordSubmit = jest.fn().mockResolvedValue('success');
+        it('should call confirmResetPassword and return resolved value', async () => {
+            confirmResetPassword.mockResolvedValue('success');
             const { actions: { forgotPasswordSubmitWithUsername } } = Store;
-            const thunk = forgotPasswordSubmitWithUsername({ username: 'testuser', code: 'testcode', password: 'testpass' });
+            const thunk = forgotPasswordSubmitWithUsername({
+                username: 'testuser',
+                code: 'testcode',
+                password: 'testpass'
+            });
 
             const result = await thunk();
 
-            expect(Auth.forgotPasswordSubmit).toHaveBeenCalledTimes(1);
-            expect(Auth.forgotPasswordSubmit).toHaveBeenCalledWith('testuser', 'testcode', 'testpass');
+            expect(confirmResetPassword).toHaveBeenCalledTimes(1);
+            expect(confirmResetPassword).toHaveBeenCalledWith({
+                username: 'testuser',
+                confirmationCode: 'testcode',
+                newPassword: 'testpass'
+            });
             expect(result).toEqual('success');
         });
 
-        it('should call resendSignUp and return rejected value', async () => {
-            Auth.forgotPasswordSubmit = jest.fn().mockRejectedValue('error');
+        it('should call confirmResetPassword and return rejected value', async () => {
+            confirmResetPassword.mockRejectedValue('error');
             const { actions: { forgotPasswordSubmitWithUsername } } = Store;
-            const thunk = forgotPasswordSubmitWithUsername({ username: 'testuser', code: 'testcode', password: 'testpass' });
+            const thunk = forgotPasswordSubmitWithUsername({
+                username: 'testuser',
+                code: 'testcode',
+                password: 'testpass'
+            });
 
             expect(thunk).rejects.toEqual('error');
         });

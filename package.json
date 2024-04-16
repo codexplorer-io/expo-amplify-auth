@@ -9,11 +9,10 @@
     "react-magnetic-di": "*",
     "react": "*",
     "@codexporer.io/react-test-utils": "*",
-    "@aws-amplify/auth": "*",
+    "aws-amplify": ">=6.0.0",
     "@codexporer.io/expo-link-stores": "*",
     "expo-linking": "*",
     "react-native": "*",
-    "expo-web-browser": "*",
-    "@aws-amplify/core": "*"
+    "expo-web-browser": "*"
   }
 }

@@ -1,4 +1,14 @@
-import { Auth, CognitoHostedUIIdentityProvider } from '@aws-amplify/auth';
+import {
+    getCurrentUser,
+    signUp,
+    confirmSignUp,
+    resendSignUpCode,
+    resetPassword,
+    confirmResetPassword,
+    signInWithRedirect,
+    signIn,
+    signOut
+} from 'aws-amplify/auth';
 import {
     CognitoIdentityProviderClient,
     DeleteUserCommand
@@ -16,7 +26,7 @@ import {
 
 const refreshAuthState = () => async ({ setState }) => {
     try {
-        const user = await Auth.currentAuthenticatedUser();
+        const user = await getCurrentUser();
         if (!user) {
             throw new Error('User does not exist.');
         }
@@ -53,24 +63,31 @@ export const Store = createStore({
         },
         refreshAuthState,
         getIsAuthenticated: () => ({ getState }) => getState().isAuthenticated,
-        signInWithHostedUi: () => () => Auth.federatedSignIn(),
-        signInWithGoogle: () => () => Auth.federatedSignIn({
-            provider: CognitoHostedUIIdentityProvider.Google
+        signInWithHostedUi: () => () => signInWithRedirect(),
+        signInWithGoogle: () => () => signInWithRedirect({
+            provider: 'Google'
         }),
-        signInWithApple: () => () => Auth.federatedSignIn({
-            provider: CognitoHostedUIIdentityProvider.Apple
+        signInWithApple: () => () => signInWithRedirect({
+            provider: 'Apple'
         }),
-        signOut: ({ global } = {}) => () => Auth.signOut({ global }),
-        signInWithUsername: ({ username, password }) => () => Auth.signIn(username, password),
-        signUpWithUsername: ({ username, password }) => () => Auth.signUp({ username, password }),
-        confirmSignUpWithUsername: ({ username, code }) => () => Auth.confirmSignUp(username, code),
-        resendSignUpWithUsername: ({ username }) => () => Auth.resendSignUp(username),
-        forgotPasswordWithUsername: ({ username }) => () => Auth.forgotPassword(username),
+        signOut: ({ global } = {}) => () => signOut({ global }),
+        signInWithUsername: ({ username, password }) => () => signIn({ username, password }),
+        signUpWithUsername: ({ username, password }) => () => signUp({ username, password }),
+        confirmSignUpWithUsername: ({ username, code }) => () => confirmSignUp({
+            username,
+            confirmationCode: code
+        }),
+        resendSignUpWithUsername: ({ username }) => () => resendSignUpCode({ username }),
+        forgotPasswordWithUsername: ({ username }) => () => resetPassword({ username }),
         forgotPasswordSubmitWithUsername: ({
             username,
             code,
             password
-        }) => () => Auth.forgotPasswordSubmit(username, code, password),
+        }) => () => confirmResetPassword({
+            username,
+            confirmationCode: code,
+            newPassword: password
+        }),
         deleteAccount: () => async ({ getState, setState }) => {
             const { user, awsCognitoRegion } = getState();
             const client = new CognitoIdentityProviderClient({

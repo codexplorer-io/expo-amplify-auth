@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Hub } from '@aws-amplify/core';
+import { Hub } from 'aws-amplify/utils';
 import { di } from 'react-magnetic-di';
 import { useAuthenticationState } from '../authentication-state';
 import { useAuthenticationEvents } from '../authentication-events';
@@ -25,18 +25,24 @@ export const useInitializeAuthentication = ({
     useEffect(() => {
         const onAuth = ({ payload: { event } }) => {
             switch (event) {
-                case 'signIn':
+                case 'signedIn':
                     onSignIn();
                     break;
-                case 'signOut':
+                case 'signedOut':
                     onSignOut();
                     break;
-                case 'signIn_failure':
+                // TODO verify in native
+                case 'signInWithRedirect':
+                    onSignIn();
+                    break;
+                case 'signInWithRedirect_failure':
                     onSignInFailure();
                     break;
+                /* Removed in v6
                 case 'codeFlow':
                     onStartSignIn();
                     break;
+                */
                 default:
                     break;
             }
