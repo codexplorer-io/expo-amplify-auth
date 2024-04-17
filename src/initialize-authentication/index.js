@@ -31,26 +31,20 @@ export const useInitializeAuthentication = ({
                 case 'signedOut':
                     onSignOut();
                     break;
-                // TODO verify in native
                 case 'signInWithRedirect':
                     onSignIn();
                     break;
                 case 'signInWithRedirect_failure':
                     onSignInFailure();
                     break;
-                /* Removed in v6
-                case 'codeFlow':
-                    onStartSignIn();
-                    break;
-                */
                 default:
                     break;
             }
         };
-        Hub.listen('auth', onAuth);
+        const hubListenerCancel = Hub.listen('auth', onAuth);
 
         return () => {
-            Hub.remove('auth', onAuth);
+            hubListenerCancel();
         };
     }, [
         onStartSignIn,

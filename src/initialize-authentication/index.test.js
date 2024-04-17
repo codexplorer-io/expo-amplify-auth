@@ -5,12 +5,11 @@ import { useAuthenticationState } from '../authentication-state';
 import { useAuthenticationEvents } from '../authentication-events';
 import { useInitializeAuthentication } from './index';
 
-jest.mock('aws-amplify/utils', () => {
-    const core = jest.requireActual('aws-amplify/utils');
-    core.Hub.listen = jest.fn();
-    core.Hub.remove = jest.fn();
-    return core;
-});
+jest.mock('aws-amplify/utils', () => ({
+    Hub: {
+        listen: jest.fn()
+    }
+}));
 
 describe('useInitializeAuthentication', () => {
     const useAuthenticationStateMock = jest.fn();
@@ -53,16 +52,22 @@ describe('useInitializeAuthentication', () => {
     });
 
     it('should call Hub.listen', () => {
+        const removeMock = jest.fn();
+        Hub.listen.mockReturnValue(removeMock);
+
         runHookWithDi(
             () => useInitializeAuthentication({ canInitialize: true }),
             { deps: defaultDeps }
         );
 
         expect(Hub.listen).toHaveBeenCalledTimes(1);
-        expect(Hub.remove).not.toHaveBeenCalled();
+        expect(removeMock).not.toHaveBeenCalled();
     });
 
-    it('should call Hub.remove', () => {
+    it('should call remove function', () => {
+        const removeMock = jest.fn();
+        Hub.listen.mockReturnValue(removeMock);
+
         const hookRunner = runHookWithDi(
             () => useInitializeAuthentication({ canInitialize: true }),
             { deps: defaultDeps }
@@ -70,7 +75,7 @@ describe('useInitializeAuthentication', () => {
 
         hookRunner.unmount();
 
-        expect(Hub.remove).toHaveBeenCalledTimes(1);
+        expect(removeMock).toHaveBeenCalledTimes(1);
     });
 
     describe('authentication events', () => {
@@ -105,17 +110,6 @@ describe('useInitializeAuthentication', () => {
             expect(onStartSignIn).not.toHaveBeenCalled();
             expect(onSignInFailure).not.toHaveBeenCalled();
         });
-
-        /* Removed in v6
-        it('should call onStartSignIn', () => {
-            oAuthMock('codeFlow');
-
-            expect(onStartSignIn).toHaveBeenCalledTimes(1);
-            expect(onSignIn).not.toHaveBeenCalled();
-            expect(onSignOut).not.toHaveBeenCalled();
-            expect(onSignInFailure).not.toHaveBeenCalled();
-        });
-        */
 
         it('should call onSignInFailure', () => {
             oAuthMock('signInWithRedirect_failure');
