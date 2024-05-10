@@ -65,10 +65,16 @@ export const Store = createStore({
         getIsAuthenticated: () => ({ getState }) => getState().isAuthenticated,
         signInWithHostedUi: () => () => signInWithRedirect(),
         signInWithGoogle: () => () => signInWithRedirect({
-            provider: 'Google'
+            provider: 'Google',
+            options: {
+                preferPrivateSession: true
+            }
         }),
         signInWithApple: () => () => signInWithRedirect({
-            provider: 'Apple'
+            provider: 'Apple',
+            options: {
+                preferPrivateSession: true
+            }
         }),
         signOut: ({ global } = {}) => () => signOut({ global }),
         signInWithUsername: ({ username, password }) => () => signIn({ username, password }),

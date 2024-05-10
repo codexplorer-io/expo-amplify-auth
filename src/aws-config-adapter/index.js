@@ -1,6 +1,4 @@
 import assign from 'lodash/assign';
-import { Platform } from 'react-native';
-import { urlOpener } from './url-opener';
 import { getRedirectUrl } from './get-redirect-url';
 
 export const configAdapter = config => {
@@ -14,8 +12,7 @@ export const configAdapter = config => {
         oauth: {
             ...config.oauth,
             redirectSignIn: redirectUrl,
-            redirectSignOut: redirectUrl,
-            ...(Platform.OS !== 'web' ? { urlOpener } : {})
+            redirectSignOut: redirectUrl
         }
     });
 };

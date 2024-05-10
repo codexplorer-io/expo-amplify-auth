@@ -172,7 +172,12 @@ describe('Authentication State', () => {
             const result = await thunk();
 
             expect(signInWithRedirect).toHaveBeenCalledTimes(1);
-            expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Google' });
+            expect(signInWithRedirect).toHaveBeenCalledWith({
+                provider: 'Google',
+                options: {
+                    preferPrivateSession: true
+                }
+            });
             expect(result).toEqual('success');
         });
 
@@ -195,7 +200,12 @@ describe('Authentication State', () => {
             const result = await thunk();
 
             expect(signInWithRedirect).toHaveBeenCalledTimes(1);
-            expect(signInWithRedirect).toHaveBeenCalledWith({ provider: 'Apple' });
+            expect(signInWithRedirect).toHaveBeenCalledWith({
+                provider: 'Apple',
+                options: {
+                    preferPrivateSession: true
+                }
+            });
             expect(result).toEqual('success');
         });
 

@@ -1,13 +1,8 @@
 import assign from 'lodash/assign';
-import { urlOpener } from './url-opener';
 import { getRedirectUrl } from './get-redirect-url';
 import { configAdapter } from './index';
 
 jest.mock('lodash/assign', () => jest.fn());
-
-jest.mock('./url-opener', () => ({
-    urlOpener: jest.fn()
-}));
 
 jest.mock('./get-redirect-url', () => ({
     getRedirectUrl: jest.fn()
@@ -34,8 +29,7 @@ describe('Config Adapter', () => {
             oauth: {
                 ...configMock.oauth,
                 redirectSignIn: undefined,
-                redirectSignOut: undefined,
-                urlOpener
+                redirectSignOut: undefined
             }
         });
     });
@@ -50,8 +44,7 @@ describe('Config Adapter', () => {
             oauth: {
                 ...configMock.oauth,
                 redirectSignIn: 'testurl',
-                redirectSignOut: 'testurl',
-                urlOpener
+                redirectSignOut: 'testurl'
             }
         });
     });
