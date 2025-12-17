@@ -3,14 +3,13 @@ import {
     createStore,
     createHook
 } from 'react-sweet-state';
-import { di } from 'react-magnetic-di';
 import without from 'lodash/without';
 import map from 'lodash/map';
-import { useAuthenticationStateActions } from '../authentication-state';
 
 export const Store = createStore({
     initialState: {
-        subscribers: []
+        subscribers: [],
+        refreshAuthState: null
     },
     actions: {
         subscribe: subscriber => ({ getState, setState }) => {
@@ -27,6 +26,12 @@ export const Store = createStore({
             setState({
                 subscribers: without(subscribers, subscriber)
             });
+        },
+        setRefreshAuthState: refreshAuthState => ({ getState, setState }) => {
+            const { refreshAuthState: currentRefreshAuthState } = getState();
+            !currentRefreshAuthState && setState({
+                refreshAuthState
+            });
         }
     },
     name: 'AuthenticationEventsSubscribers'
@@ -39,10 +44,10 @@ export const useAuthenticationEventsSubscriberActions = createHook(Store, {
 });
 
 export const useAuthenticationEvents = () => {
-    di(useAuthenticationEventsSubscriber, useAuthenticationStateActions);
-
-    const [{ subscribers }] = useAuthenticationEventsSubscriber();
-    const [, { refreshAuthState }] = useAuthenticationStateActions();
+    const [{
+        subscribers,
+        refreshAuthState
+    }] = useAuthenticationEventsSubscriber();
 
     const onStartSignIn = useCallback(async () => {
         await Promise.all(
@@ -57,7 +62,7 @@ export const useAuthenticationEvents = () => {
     }, [subscribers]);
 
     const onSignIn = useCallback(async () => {
-        await refreshAuthState();
+        await refreshAuthState?.();
         await Promise.all(
             map(subscribers, async subscriber => {
                 try {
@@ -73,7 +78,7 @@ export const useAuthenticationEvents = () => {
     ]);
 
     const onSignInFailure = useCallback(async () => {
-        await refreshAuthState();
+        await refreshAuthState?.();
         await Promise.all(
             map(subscribers, async subscriber => {
                 try {
@@ -85,8 +90,22 @@ export const useAuthenticationEvents = () => {
         );
     }, [refreshAuthState, subscribers]);
 
+    const onStartSignOut = useCallback(async () => {
+        await Promise.all(
+            map(subscribers, async subscriber => {
+                try {
+                    await Promise.resolve(subscriber.onStartSignOut?.());
+                } catch {
+                    // Ignore empty block
+                }
+            })
+        );
+    }, [
+        subscribers
+    ]);
+
     const onSignOut = useCallback(async () => {
-        await refreshAuthState();
+        await refreshAuthState?.();
         await Promise.all(
             map(subscribers, async subscriber => {
                 try {
@@ -105,11 +124,13 @@ export const useAuthenticationEvents = () => {
         onStartSignIn,
         onSignIn,
         onSignInFailure,
+        onStartSignOut,
         onSignOut
     }), [
         onStartSignIn,
         onSignIn,
         onSignInFailure,
+        onStartSignOut,
         onSignOut
     ]);
 };

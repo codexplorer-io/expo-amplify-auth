@@ -15,14 +15,15 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
     createStore,
-    createHook,
-    createStateHook
+    createStateHook,
+    createActionsHook
 } from 'react-sweet-state';
 import {
     initialState,
-    actions,
-    selector
+    actions
 } from '@codexporer.io/expo-link-stores';
+import { useEffect, useMemo } from 'react';
+import { useAuthenticationEvents, useAuthenticationEventsSubscriberActions } from '../authentication-events';
 
 const refreshAuthState = () => async ({ setState }) => {
     try {
@@ -113,12 +114,34 @@ export const Store = createStore({
     name: 'AuthenticationState'
 });
 
-export const useAuthenticationState = createHook(Store, { selector: state => selector(state) });
-
-export const useAuthenticationStateActions = createHook(Store, {
-    selector: null
-});
+export const useAuthenticationState = createStateHook(Store);
 
 export const useIsAuthenticated = createStateHook(Store, {
     selector: ({ isAuthenticated }) => isAuthenticated
 });
+
+const useAuthenticationStateActionsInternal = createActionsHook(Store);
+
+export const useAuthenticationStateActions = () => {
+    const actions = useAuthenticationStateActionsInternal();
+    const [, { setRefreshAuthState }] = useAuthenticationEventsSubscriberActions();
+    const { onStartSignOut } = useAuthenticationEvents();
+
+    useEffect(() => {
+        setRefreshAuthState(actions.refreshAuthState);
+    }, [
+        actions.refreshAuthState,
+        setRefreshAuthState
+    ]);
+
+    return useMemo(() => ({
+        ...actions,
+        signOut: async (...args) => {
+            await onStartSignOut();
+            return signOut(...args);
+        }
+    }), [
+        actions,
+        onStartSignOut
+    ]);
+};

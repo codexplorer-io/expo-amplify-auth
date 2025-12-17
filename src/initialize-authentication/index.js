@@ -1,19 +1,17 @@
 import { useEffect } from 'react';
 import { Hub } from 'aws-amplify/utils';
-import { di } from 'react-magnetic-di';
-import { useAuthenticationState } from '../authentication-state';
+import {
+    useAuthenticationState,
+    useAuthenticationStateActions
+} from '../authentication-state';
 import { useAuthenticationEvents } from '../authentication-events';
 
 export const useInitializeAuthentication = ({
     canInitialize,
     awsCognitoRegion
 }) => {
-    di(useAuthenticationEvents, useAuthenticationState);
-
-    const [
-        { isInitialized, isAuthenticated },
-        { initializeAuthState }
-    ] = useAuthenticationState();
+    const { isInitialized, isAuthenticated } = useAuthenticationState();
+    const { initializeAuthState } = useAuthenticationStateActions();
     const {
         onStartSignIn,
         onSignIn,
