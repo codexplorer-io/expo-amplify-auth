@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
     createStore,
     createHook
@@ -48,10 +48,12 @@ export const useAuthenticationEvents = () => {
         subscribers,
         refreshAuthState
     }] = useAuthenticationEventsSubscriber();
+    const subscribersRef = useRef();
+    subscribersRef.current = subscribers;
 
     const onStartSignIn = useCallback(async () => {
         await Promise.all(
-            map(subscribers, async subscriber => {
+            map(subscribersRef.current, async subscriber => {
                 try {
                     await Promise.resolve(subscriber.onStartSignIn?.());
                 } catch {
@@ -59,12 +61,12 @@ export const useAuthenticationEvents = () => {
                 }
             })
         );
-    }, [subscribers]);
+    }, []);
 
     const onSignIn = useCallback(async () => {
         await refreshAuthState?.();
         await Promise.all(
-            map(subscribers, async subscriber => {
+            map(subscribersRef.current, async subscriber => {
                 try {
                     await Promise.resolve(subscriber.onSignIn?.());
                 } catch {
@@ -72,15 +74,12 @@ export const useAuthenticationEvents = () => {
                 }
             })
         );
-    }, [
-        refreshAuthState,
-        subscribers
-    ]);
+    }, [refreshAuthState]);
 
     const onSignInFailure = useCallback(async () => {
         await refreshAuthState?.();
         await Promise.all(
-            map(subscribers, async subscriber => {
+            map(subscribersRef.current, async subscriber => {
                 try {
                     await Promise.resolve(subscriber.onSignInFailure?.());
                 } catch {
@@ -88,11 +87,11 @@ export const useAuthenticationEvents = () => {
                 }
             })
         );
-    }, [refreshAuthState, subscribers]);
+    }, [refreshAuthState]);
 
     const onStartSignOut = useCallback(async () => {
         await Promise.all(
-            map(subscribers, async subscriber => {
+            map(subscribersRef.current, async subscriber => {
                 try {
                     await Promise.resolve(subscriber.onStartSignOut?.());
                 } catch {
@@ -100,14 +99,12 @@ export const useAuthenticationEvents = () => {
                 }
             })
         );
-    }, [
-        subscribers
-    ]);
+    }, []);
 
     const onSignOut = useCallback(async () => {
         await refreshAuthState?.();
         await Promise.all(
-            map(subscribers, async subscriber => {
+            map(subscribersRef.current, async subscriber => {
                 try {
                     await Promise.resolve(subscriber.onSignOut?.());
                 } catch {
@@ -115,10 +112,7 @@ export const useAuthenticationEvents = () => {
                 }
             })
         );
-    }, [
-        refreshAuthState,
-        subscribers
-    ]);
+    }, [refreshAuthState]);
 
     return useMemo(() => ({
         onStartSignIn,

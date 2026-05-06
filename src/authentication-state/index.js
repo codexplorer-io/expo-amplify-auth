@@ -20,7 +20,8 @@ import {
 } from 'react-sweet-state';
 import {
     initialState,
-    actions
+    actions,
+    selector
 } from '@codexporer.io/expo-link-stores';
 import { useEffect, useMemo } from 'react';
 import { useAuthenticationEvents, useAuthenticationEventsSubscriberActions } from '../authentication-events';
@@ -114,7 +115,7 @@ export const Store = createStore({
     name: 'AuthenticationState'
 });
 
-export const useAuthenticationState = createStateHook(Store);
+export const useAuthenticationState = createStateHook(Store, { selector });
 
 export const useIsAuthenticated = createStateHook(Store, {
     selector: ({ isAuthenticated }) => isAuthenticated
